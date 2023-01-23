@@ -4,7 +4,9 @@ param (
     [switch]$IncludeWin32WillCompileErrorFiles = $false,
     [switch]$ExcludeWindres = $false,
     [switch]$ExcludeLLVMRC = $false,
-    [switch]$ExcludeResinator = $false
+    [switch]$ExcludeResinator = $false,
+    [switch]$ErrorOnAnyDiscrepancies = $false,
+    [switch]$ErrorOnAnyLikelyPanics = $false
 )
 
 . ".\_common.ps1"
@@ -177,6 +179,8 @@ foreach($f in $files) {
     Write-Log "=================================================`n`n"
 }
 
+$any_discrepancies = $false
+$any_likely_panics = $false
 Write-Output ""
 foreach ($alt_compiler in $alt_compilers) {
     if (-not $compilers[$alt_compiler]) { continue }
@@ -187,6 +191,7 @@ foreach ($alt_compiler in $alt_compilers) {
     if ($results.likely_panics -ne 0) {
         Write-Output "`ncheck $result_log_file for lines with LIKELY PANIC:"
         Write-Output "likely crashes/panics:      $($results.likely_panics)"
+        $any_likely_panics = $true
     }
     $total_discrepancies = $results.unexpected_errors + $results.missing_errors + $results.different_outputs
     if ($total_discrepancies -ne 0) {
@@ -194,6 +199,7 @@ foreach ($alt_compiler in $alt_compilers) {
         Write-Output "different .res outputs:     $($results.different_outputs)"
         Write-Output "unexpected compile errors:  $($results.unexpected_errors)"
         Write-Output "missing compile errors:     $($results.missing_errors)"
+        $any_discrepancies = $true
     }
     $total_conforming = $results.successes + $results.expected_errors
     Write-Output "`n$total_conforming .rc files processed without discrepancies"
@@ -203,3 +209,12 @@ foreach ($alt_compiler in $alt_compilers) {
 
 Write-Output "`n---------------------------"
 Write-Output "`nSee $result_log_file for details about each file`n"
+
+if ($any_discrepancies -and $ErrorOnAnyDiscrepancies) {
+    Write-Error "Found at least one discrepancy"
+    exit 1
+}
+if ($any_likely_panics -and $ErrorOnAnyLikelyPanics) {
+    Write-Error "Found at least one likely panic"
+    exit 1
+}
