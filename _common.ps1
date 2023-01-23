@@ -23,7 +23,11 @@ function Ensure-HasCommand {
 function Test-IsUtf16Le {
     param ( $path )
 
-    [byte[]]$bytes = Get-Content -Encoding byte -ReadCount 2 -TotalCount 2 -Path "$path"
+    if ($Host.Version.Major -ge 6) {
+        [byte[]]$bytes = Get-Content -AsByteStream -ReadCount 2 -TotalCount 2 -Path "$path"
+    } else {
+        [byte[]]$bytes = Get-Content -Encoding byte -ReadCount 2 -TotalCount 2 -Path "$path"
+    }
     if ($null -eq $bytes) { return $false }
 
     # FF FE (UTF-16 Little-Endian)
