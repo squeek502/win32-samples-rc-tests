@@ -1,3 +1,6 @@
 files/afxres.rc
 files/afxprint.rc
 *.log
+*.exe
+*.obj
+*.pdb
