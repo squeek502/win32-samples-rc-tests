@@ -10,7 +10,7 @@ An overview of what this does:
   + Converting some `UTF-16 with BOM`-encoded files to UTF-8/ASCII (since most preprocessors can't handle UTF-16)
 - `test.ps1` will then run each `.rc` file through `rc.exe` to get the expected output, and then for each alternate RC compiler found, it will compile the `.rc` file and then compare the results to the `rc.exe` output. Any differences (`.res` output not byte-for-byte identical, missing compile error, unexpected compile error) are considered discrepancies and a report of all the discrepancies found is printed at the end of execution.
 
-Example output:
+Results when testing with `resinator`, `llvm-rc 16.0.3`, and `windres 2.38`:
 
 ```
 > .\test.ps1 -IncludeWin32WillCompileErrorFiles
@@ -18,22 +18,22 @@ Found RC compiler: resinator
 Found RC compiler: windres
 Found RC compiler: llvm-rc
 
-Processed 506 .rc files
+Processed 485 .rc files
 
 ---------------------------
   resinator
 ---------------------------
 
-506 .rc files processed without discrepancies
-identical .res outputs:     481
+485 .rc files processed without discrepancies
+identical .res outputs:     460
 expected compile errors:    25
 
 ---------------------------
   windres
 ---------------------------
 
-416 .rc files processed with discrepancies
-different .res outputs:     320
+395 .rc files processed with discrepancies
+different .res outputs:     299
 unexpected compile errors:  96
 missing compile errors:     0
 
@@ -50,8 +50,8 @@ different .res outputs:     89
 unexpected compile errors:  154
 missing compile errors:     0
 
-263 .rc files processed without discrepancies
-identical .res outputs:     238
+242 .rc files processed without discrepancies
+identical .res outputs:     217
 expected compile errors:    25
 
 ---------------------------
