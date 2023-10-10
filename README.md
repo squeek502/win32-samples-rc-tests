@@ -80,6 +80,7 @@ Options:
 - `-ExcludeWindres`: Don't test with `windres` even if it's found in the PATH
 - `-ExcludeLLVMRC`: Don't test with `llvm-rc` even if it's found in the PATH
 - `-ExcludeResinator`: Don't test with `resinator` even if it's found in the PATH
+- `-ExcludeZigRC`: Don't test with `zig rc` even if it's found in the PATH
 - `-ExitOnRCFailure`: Will cause the script to exit if `rc.exe` returns a non-zero exit code. Useful only when debugging `setup.ps1` to add support for more `.rc` files
 - `-ErrorOnAnyDiscrepancies`: Will cause the script to exit with exit code `1` if any discrepancies are found. Useful when running in a CI environment
 - `-ErrorOnAnyLikelyPanics`: Will cause the script to exit with exit code `1` if any likely crashes/panics are found. Useful when running in a CI environment

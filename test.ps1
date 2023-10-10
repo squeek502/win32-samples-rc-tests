@@ -5,6 +5,7 @@ param (
     [switch]$ExcludeWindres = $false,
     [switch]$ExcludeLLVMRC = $false,
     [switch]$ExcludeResinator = $false,
+    [switch]$ExcludeZigRC = $false,
     [switch]$ErrorOnAnyDiscrepancies = $false,
     [switch]$ErrorOnAnyLikelyPanics = $false
 )
@@ -26,12 +27,13 @@ function Write-Log {
 $compilers = @{
     rc = @{ cmd = "rc.exe"; successes = 0; errors = 0; }
 }
-$alt_compilers = @("resinator", "windres", "llvm-rc")
+$alt_compilers = @("resinator", "windres", "llvm-rc", "zig")
 foreach($alt_compiler in $alt_compilers)
 {
     if ($ExcludeResinator -and $alt_compiler -eq "resinator") { continue }
     if ($ExcludeWindres -and $alt_compiler -eq "windres") { continue }
     if ($ExcludeLLVMRC -and $alt_compiler -eq "llvm-rc") { continue }
+    if ($ExcludeZigRC -and $alt_compiler -eq "zig") { continue }
 
     if (Test-HasCommand $alt_compiler) {
         $compilers[$alt_compiler] = @{ cmd = $alt_compiler; successes = 0; expected_errors = 0; unexpected_errors = 0; missing_errors = 0; different_outputs = 0; likely_panics = 0; }
@@ -114,6 +116,9 @@ foreach($f in $files) {
         if (-not $compilers[$alt_compiler]) { continue }
 
         $compiler_cmd = $compilers[$alt_compiler].cmd
+        if ($alt_compiler -eq "zig") {
+            $compiler_cmd = $compiler_cmd + " rc"
+        }
         $actual_outfilename = $f.BaseName + "." + $alt_compiler + ".res"
         $actual_fulloutfile = "$dirname\$actual_outfilename"
 
@@ -184,8 +189,12 @@ $any_likely_panics = $false
 Write-Output ""
 foreach ($alt_compiler in $alt_compilers) {
     if (-not $compilers[$alt_compiler]) { continue }
+    $compiler_name = $alt_compiler
+    if ($compiler_name -eq "zig") {
+        $compiler_name = "zig rc"
+    }
     Write-Output "`n---------------------------"
-    Write-Output "  $alt_compiler"
+    Write-Output "  $compiler_name"
     Write-Output "---------------------------"
     $results = $compilers[$alt_compiler]
     if ($results.likely_panics -ne 0) {
