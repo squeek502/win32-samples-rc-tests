@@ -211,9 +211,15 @@ foreach ($alt_compiler in $alt_compilers) {
         $any_discrepancies = $true
     }
     $total_conforming = $results.successes + $results.expected_errors
-    Write-Output "`n$total_conforming .rc files processed without discrepancies"
-    Write-Output "identical .res outputs:     $($results.successes)"
-    Write-Output "expected compile errors:    $($results.expected_errors)"
+    if ($total_conforming -ne 0) {
+        Write-Output "`n$total_conforming .rc files processed without discrepancies"
+        if ($results.successes -ne 0) {
+            Write-Output "identical .res outputs:     $($results.successes)"
+        }
+        if ($results.expected_errors -ne 0) {
+            Write-Output "expected compile errors:    $($results.expected_errors)"
+        }
+    }
 }
 
 Write-Output "`n---------------------------"
