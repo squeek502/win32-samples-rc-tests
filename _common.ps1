@@ -73,7 +73,11 @@ function Test-Win32WillCompileError {
     # The .rc files in this directory are templates and have strings that are
     # meant for string replacement, so the .rc files aren't intended for direct
     # compilation
-    if ($f.FullName -match "Win7Samples\\multimedia\\WMP\\Wizards") { return 1 }
+    if ($f.FullName -match "Win7Samples\\multimedia\\WMP\\Wizards") {
+        # This particular .rc file is okay, though
+        if ($f.Name -eq "ps.rc") { return 0 }
+        return 1
+    }
 
     # This .rc file is not referenced by the .sln and seems to depend on some
     # PEERNETBASEDIR that I have no information about
