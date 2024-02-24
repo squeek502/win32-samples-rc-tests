@@ -77,9 +77,10 @@ foreach($f in $files) {
     $fulloutfile = "$dirname\$outfilename"
     $extra_include_paths = @()
     if ($dirname -match "oledb_conformance") {
-        $pos = $dirname.IndexOf("oledb_conformance")
-        $include_dir_parent = $dirname.Substring(0, $pos + "oledb_conformance".Length)
-        $extra_include_paths += "$include_dir_parent\include"
+        $extra_include_paths += "..\..\include"
+    }
+    else {
+        continue
     }
     if ($dirname -match "Win7Samples\\netds\\eap\\eaphost") {
         $extra_include_paths += "..\inc"
