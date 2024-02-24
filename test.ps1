@@ -85,16 +85,16 @@ foreach($f in $files) {
         $extra_include_paths += "..\inc"
     }
     $extra_rc_args = $extra_include_paths | ForEach-Object {"/I", "`"$_`""}
-    $command = {rc.exe /fo "$outfilename" $extra_rc_args "$rcfilename" 2>&1}
+    $command_string = "rc.exe /fo `"$outfilename`" $extra_rc_args `"$rcfilename`" 2>&1"
 
     Push-Location "$dirname"
-    $output = & $command
+    $output = & cmd /S /C "$command_string"
     $exitcode = $LASTEXITCODE
     Pop-Location
 
     Write-Log ("Cwd: $dirname")
     Write-Log ("Rc: $rcfilename`n")
-    Write-Log ("Command: " + $ExecutionContext.InvokeCommand.ExpandString($command))
+    Write-Log ("Command: $command_string")
     Write-Log ("Command output (exit code: " + $exitcode + "):`n---")
     Write-Log ($output -join "`n")
     Write-Log "---`n"
