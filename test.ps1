@@ -76,7 +76,7 @@ foreach($f in $files) {
     $rcfilename = $f.Name
     $fulloutfile = "$dirname\$outfilename"
     $extra_include_paths = @()
-    if ($dirname -match "oledb_conformance") {
+    if ($dirname -match "datalite") {
         $extra_include_paths += "..\..\include"
     }
     else {
