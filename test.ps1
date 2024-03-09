@@ -7,7 +7,8 @@ param (
     [switch]$ExcludeResinator = $false,
     [switch]$ExcludeZigRC = $false,
     [switch]$ErrorOnAnyDiscrepancies = $false,
-    [switch]$ErrorOnAnyLikelyPanics = $false
+    [switch]$ErrorOnAnyLikelyPanics = $false,
+    [switch]$MinGWCompat = $false
 )
 
 . ".\_common.ps1"
@@ -85,6 +86,14 @@ foreach($f in $files) {
         $extra_include_paths += "..\inc"
     }
     $extra_rc_args = $extra_include_paths | ForEach-Object {"/I", "`"$_`""}
+    if ($MinGWCompat) {
+        # Necessary to avoid a compile error in MinGW's vadefs.h which expects either
+        # _MSC_VER or __GNUC__ to be defined. Additionally, one of _M_IA64, _M_IX86,
+        # or _M_AMD64 must be defined if _MSC_VER is defined.
+        $extra_rc_args += " /D_MSC_VER /D_M_AMD64"
+        # Avoid an error in winnt.h
+        $extra_rc_args += " /D__x86_64__"
+    }
     $command_string = "rc.exe /fo `"$outfilename`" $extra_rc_args `"$rcfilename`" 2>&1"
 
     Push-Location "$dirname"
@@ -122,7 +131,12 @@ foreach($f in $files) {
         $actual_outfilename = $f.BaseName + "." + $alt_compiler + ".res"
         $actual_fulloutfile = "$dirname\$actual_outfilename"
 
-        if ($alt_compiler -ne "windres") {
+        if ($alt_compiler -eq "resinator" -or $alt_compiler -eq "zig") {
+            # We want to set /:auto-includes none so that we test the INCLUDE env var, and
+            # allow e.g. using the INCLUDE env var to test different sets of headers (for example,
+            # setting INCLUDE to only have the paths to MinGW headers)
+            $actual_command_string = "$compiler_cmd /fo `"$actual_outfilename`" /:auto-includes none $extra_rc_args `"$rcfilename`" 2>&1"
+        } elseif ($alt_compiler -ne "windres") {
             $actual_command_string = "$compiler_cmd /fo `"$actual_outfilename`" $extra_rc_args `"$rcfilename`" 2>&1"
         } else {
             $all_extra_include_paths = $extra_include_paths + $extra_windres_include_paths
