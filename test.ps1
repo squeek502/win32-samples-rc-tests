@@ -2,7 +2,6 @@ param (
     [switch]$ExitOnRCFailure = $false,
     [switch]$IncludePreprocessorQuirkFiles = $false,
     [switch]$IncludeWin32WillCompileErrorFiles = $false,
-    [switch]$ExcludeZigRC = $false,
     [switch]$ErrorOnAnyDiscrepancies = $false,
     [switch]$ErrorOnAnyLikelyPanics = $false,
     [switch]$MinGWCompat = $false
@@ -88,8 +87,8 @@ foreach($f in $files) {
         }
     }
 
+    $empty_zig_path = Join-Path $PSScriptRoot "empty.zig"
     if ($exitcode -eq 0) {
-        $empty_zig_path = Join-Path $PSScriptRoot "empty.zig"
         $intermediatedllname = $f.BaseName + ".dll"
         $outdllname = $f.BaseName + ".expected.dll"
         $fulldllname = "$dirname\$outdllname"
@@ -118,7 +117,11 @@ foreach($f in $files) {
     $actual_outfilename = $actual_basename + ".dll"
     $actual_fulloutfile = "$dirname\$actual_outfilename"
 
-    $actual_command_string = "$zig_command build-lib -dynamic -OReleaseSmall `"$empty_zig_path`" -rcflags $extra_rc_args -- `"$rcfilename`" -femit-bin=`"$intermediatedllname`" 2>&1"
+    $rcincludes = "any"
+    if ($MinGWCompat) {
+        $rcincludes = "gnu"
+    }
+    $actual_command_string = "$zig_command build-lib -dynamic -OReleaseSmall `"$empty_zig_path`" -rcincludes $rcincludes -rcflags $extra_rc_args -- `"$rcfilename`" -femit-bin=`"$intermediatedllname`" 2>&1"
 
     Write-Log ("Command: $actual_command_string")
 
